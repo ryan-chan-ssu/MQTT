@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Potentiometer Data</title>
+    <style>
+        body {
+            background-color: #fff7e0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        #potGraph {
+            display: block;
+            margin: 20px auto;
+            width: 100%;
+            max-width: 1000px;
+            max-height: 400px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Potentiometer Data Visualization</h1>
+    <canvas id="potGraph"></canvas>
+
+    <script>
+        async function fetchData() {
+            try {
+                const response = await fetch('data.php'); // Replace with your PHP endpoint
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                return [];
+            }
+        }
+
+        async function renderGraph() {
+            const data = await fetchData();
+            const labels = data.map(row => row.timestamp); // X-axis: timestamps
+            const values = data.map(row => row.value);     // Y-axis: potentiometer values
+
+            const ctx = document.getElementById('potGraph').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Voltage (V)',
+                        data: values,
+                        borderColor: 'rgba(75, 192, 192, 1)', // Teal line
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)', // Light teal fill
+                        borderWidth: 2,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // Allow dynamic resizing
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Timestamp',
+                                color: '#333',
+                                font: { size: 14 }
+                            },
+                            ticks: { color: '#666' }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Voltage (V)',
+                                color: '#333',
+                                font: { size: 14 }
+                            },
+                            ticks: { color: '#666' },
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#444', font: { size: 14 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        renderGraph();
+        setInterval(renderGraph, 20000); // Update graph every 20 seconds
+    </script>
+</body>
+</html>
